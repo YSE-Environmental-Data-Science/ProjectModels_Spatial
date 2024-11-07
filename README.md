@@ -1,4 +1,4 @@
-# Spatial Projects of a randomForest model
+# Spatial Projections of a randomForest model
 
 In this workshop we will create a spatial projection of our random forest model for monthly methane echange from natural ecosystems. 
 
