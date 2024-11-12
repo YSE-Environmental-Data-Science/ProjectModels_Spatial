@@ -49,19 +49,19 @@ To project this model in space, we need the following variables:
 
 (1) Monthly total precipitation in mm and the name of the layer needs to be "P_F"
 (2) Monthly mean air temperature in degrees Celsius and the layer name needs to be "TA_F"
-(3) We need an indicator for Upland ecosystems called Upland. All inundated ecosystems (+ snow) are called "inundated" and non-inundated ecosystems are called "upland". Croplands and urban areas should be filtered out of this layer. 
+(3) We need an indicator for upland ecosystems called Upland. All inundated ecosystems (+ snow) are given the value "0" and non-inundated ecosystems are given the value "1". Croplands and urban areas should be filtered out of this layer. 
 
 # (2) Determine where you can get a spatial version of each variable in your model.
+We will spatialize the model for Connecticut in the year 2021.
 
-(1) Monthly total precipitation (mm): Terra climate (getTerraClim())
-(2) Monthly mean air temperature temperature in degrees Celsius: Terra climate (getTerraClim())
-(3) Indicator for Upland ecosystems (Upland): MODIS Land Cover Data (Majority_Land_Cover_Type_1) downloaded from: (2001 - 2022) https://lpdaac.usgs.gov/products/mcd12c1v061/ the user guide is available here: https://lpdaac.usgs.gov/documents/101/MCD12_User_Guide_V6.pdf
+(1) Monthly total precipitation (mm): Terra climate (getTerraClim()). 
+(2) Monthly mean air temperature temperature in degrees Celsius: Terra climate (getTerraClim()). 
+(3) Indicator for Upland ecosystems (Upland): MODIS Land Cover Data (Majority_Land_Cover_Type_1).  downloaded from: (2001 - 2022) https://lpdaac.usgs.gov/products/mcd12c1v061/ the user guide is available here: https://lpdaac.usgs.gov/documents/101/MCD12_User_Guide_V6.pdf. 
 
-To use raster layers with the predict function, they must have the same CRS, resolution, and extent!
+### To use raster layers with the predict function, they must have the same CRS, resolution, and extent!
 
-#(3) Format each spatial layer 
-
-Download the climate layers needed for P_F and T_F. We will spatialize the model for Connecticut in the year 2021. 
+#(3) Format each spatial layer. 
+Download the climate layers needed for P_F and T_F using getTerraClim().
 ```{r}
 library(AOI)
 library(climateR)
@@ -109,32 +109,32 @@ igbp.ct
 ```
 This layer needs to be reformatted. Using the User Guide we can determine what each numerical value represents: https://lpdaac.usgs.gov/documents/1409/MCD12_User_Guide_V61.pdf
 
-1: ENF
-2: EBF
-3: DNF
-4: DBF
-5: MF
-6: CS
-7: OS
-8: WS
-9 : SAV
-10 : GRA
-11: WET
-12 : CRO
-13 : URB
-14 : CRO
-15 : SNO
-16: Barren
-17 : WAT
-0: Unclassified
+1: ENF. 
+2: EBF. 
+3: DNF. 
+4: DBF. 
+5: MF. 
+6: CS. 
+7: OS. 
+8: WS. 
+9 : SAV. 
+10 : GRA. 
+11: WET. 
+12 : CRO. 
+13 : URB. 
+14 : CRO. 
+15 : SNO. 
+16: Barren. 
+17 : WAT. 
+0: Unclassified. 
 
 look at the layer. Here I use"[[1]]" to see only the first layer, which is for the year 2001.
 ```{r}
 terra::plot(igbp.ct[[1]])
 ```
-Reclassify each value, one at a time, and think about how you should reclassify each. We want to give all uplands the value one and all inundated systems the value 0.
+Reclassify each value, one at a time, and think about how you should reclassify each. We want to give all uplands the value "1" and all inundated systems the value "0".
 
-First, make a copy of the raters (igbp.ct) and call it igbp.ct.r
+First, make a copy of the raters (igbp.ct) and call it igbp.ct.r:
 ```{r}
 igbp.ct.r <- igbp.ct
 ```
@@ -164,7 +164,7 @@ igbp.ct.r[ igbp.ct.r == 15] <- 0
 igbp.ct.r[ igbp.ct.r == 16] <- 1
 igbp.ct.r[ igbp.ct.r == 17] <- 0
 ```
-Look at the final rater to ensure everything is reclassified to upland since Connecticut doesn't have anything else at the resolution of MODIS.
+Look at the final raster to ensure everything is reclassified to upland since Connecticut doesn't have anything else at the resolution of MODIS.
 ```{r}
 terra::plot(igbp.ct[[1]] ) 
 ```
@@ -251,6 +251,10 @@ for ( i in 1:12){
   model.rasters <- c(igbp.ct.r.2021, global.clim.tmean.resample[[i]], global.clim.ppt.resample[[i]] )
   names(model.rasters) <- c("Upland", "TA_F", "P_F" )
   pred <- terra::predict(  object= model.rasters, model=FCH4_F_gC.rf)
+  
+  units(pred) <- 'g C m-2 month-1' # Add the units
+  names(pred ) <- "F_CH4" # Name the layer
+  
   writeRaster(pred ,paste("MODEL_PRED_m",i,".tif", sep =""), overwrite=TRUE )
 }
 ```
@@ -264,22 +268,33 @@ Import the files.
 predictions <- rast(pred)
 predictions
 ```
-
 # (5) Use predictions
 Create the 2021 methane budget.
 ```{r}
 predictions.2021.total <- sum(predictions )
+units(predictions.2021.total ) <- 'g C m-2 year-1' # add the units
+names(predictions.2021.total ) <- "F_CH4"
 plot(predictions.2021.total)
-terra::global(predictions.2021.total, sum, na.rm=T)
+```
+
+To get the total amount of methane in 2021 for natural areas we need to consider the area:
+
+```{r}
+ct.area = cellSize(predictions.2021.total, unit="m")
+predictions.2021.total$F_CH4_total <- (predictions.2021.total$F_CH4 * ct.area)/1000000000000 
+units(predictions.2021.total$F_CH4_total) <- "Gigatons of carbon per year"
+
+# Total emissions in 2021:
+global( predictions.2021.total$F_CH4_total, "sum", na.rm=T)
 
 ```
-Now you are ready to follow the same workflow for your model.
-(1) Make a list of the variables, their units, the exact name and class of each variable in your model. 
-(2) Determine where you can get a spatial version of each variable in your model.
-(3) Format each spatial layer
-(4) Make predictions
-(5) Use predictions
+
+Now you are ready to follow the same workflow for your model for your final project.
+(1) Determine where you will project your model.  
+(2) Make a list of the variables, their units, the exact name and class of each variable in your model.   
+(3) Determine where you can get a spatial version of each variable in your model.  
+(4) Format each spatial layer. 
+(5) Make predictions. 
+(6) Use predictions. 
 
 Ensure your raster layers all have the same CRS and resolution!
-
-Go to canvas to view the details of the post-workshop assessment.
