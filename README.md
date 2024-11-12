@@ -24,7 +24,11 @@ Load the datasets and the model.
 rm(list=ls())
 load(file="data/final_model.RDATA" )
 ```
-There are four items in this.RDATA file. (1) the randomForest model, (2) the flux net dataset, (3) the training data, and (4) the testing data.
+There are four items in this.RDATA file.
+(1) the randomForest model, 
+(2) the flux net dataset, 
+(3) the training data, and 
+(4) the testing data.
 
 ### Look at the model to determine which variables are in it:
 ```{r}
