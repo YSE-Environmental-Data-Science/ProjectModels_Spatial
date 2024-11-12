@@ -6,3 +6,5 @@ CodePrep.R
 data
 ProjectModels_Spatial.Rproj
 .DS_Store
+data.zip
+predictions

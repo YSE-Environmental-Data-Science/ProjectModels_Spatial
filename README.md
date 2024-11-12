@@ -4,12 +4,17 @@ In this workshop, we will create a spatial projection of our random forest model
 
 To date, we have completed model calibration, validation, and sensitivity analysis. Next, we can apply the model to a landscape to estimate natural methane emissions. For this workshop, we will calculate Connecticut's natural emissions.
 
-In this workshop, we will:
-(1) Make a list of the variables, their units, and the exact name and class of each variable in your model. 
+### In this workshop, we will:
+
+(1) Make a list of the variables, their units, and the exact name and class of each variable in your model.
+
 (2) Determine where you can get a spatial version of each variable in your model.
-(3) Format each spatial layer
-(4) Make predictions in space
-(5) Use predictions to calculate a budget
+
+(3) Format each spatial layer to match the exact conditions of the data used to fit the model. 
+
+(4) Make spatial predictions.
+
+(5) Use predictions to calculate an annual budget.
 
 
 # (1) Make a list of the variables, their units, the exact name and class of each variable in your model. 
