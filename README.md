@@ -277,7 +277,7 @@ names(predictions.2021.total ) <- "F_CH4"
 plot(predictions.2021.total)
 ```
 
-To get the total amount of methane in 2021 for natural areas we need to consider the area:
+To determine the total amount of methane in 2021 for natural areas we need to consider the area:
 
 ```{r}
 ct.area = cellSize(predictions.2021.total, unit="m")
@@ -289,8 +289,8 @@ global( predictions.2021.total$F_CH4_total, "sum", na.rm=T)
 
 ```
 
-Now you are ready to follow the same workflow for your model for your final project.
-(1) Determine where you will project your model.  
+Now you are ready to follow the same workflow for your model.
+(1) For your final project, determine where you will project your model.  
 (2) Make a list of the variables, their units, the exact name and class of each variable in your model.   
 (3) Determine where you can get a spatial version of each variable in your model.  
 (4) Format each spatial layer. 
