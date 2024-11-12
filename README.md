@@ -1,11 +1,11 @@
 # Spatial Projections of a randomForest model
 
-In this workshop we will create a spatial projection of our random forest model for monthly methane echange from natural ecosystems. 
+In this workshop, we will create a spatial projection of our random forest model for monthly methane exchange from natural ecosystems. 
 
-To date, we have completed model calibration, validation, and sensitivity analysis. Next we are ready to apply the model to a landscape to estimate natural methane emissions. For this workshop we will estimate natural emissions for Connecticut.
+To date, we have completed model calibration, validation, and sensitivity analysis. Next, we can apply the model to a landscape to estimate natural methane emissions. For this workshop, we will calculate Connecticut's natural emissions.
 
-In this workshop we will:
-(1) Make a list of the variables, their units, the exact name and class of each variable in your model. 
+In this workshop, we will:
+(1) Make a list of the variables, their units, and the exact name and class of each variable in your model. 
 (2) Determine where you can get a spatial version of each variable in your model.
 (3) Format each spatial layer
 (4) Make predictions in space
@@ -19,7 +19,7 @@ Load the datasets and the model.
 rm(list=ls())
 load(file="data/final_model.RDATA" )
 ```
-There are four items in this .RDATA file. (1) a randomForest model, (2) the fluxnet dataset, (3) the training data, and (4) the testing data.
+There are four items in this.RDATA file. (1) the randomForest model, (2) the flux net dataset, (3) the training data, and (4) the testing data.
 
 ### Look at the model to determine which variables are in it:
 ```{r}
@@ -27,28 +27,28 @@ library(randomForest)
 
 FCH4_F_gC.rf
 ```
-The model includes precipitation in mm (P_F), mean air temperature temperature in degrees Celsius (TA_F) and an indicator for upland ecosystems (Upland).
+The model includes precipitation in mm (P_F), mean air temperature in degrees Celsius (TA_F), and an indicator for upland ecosystems (Upland).
 
-Check the class of the each variable.
+Check the class of each variable.
 ```{r}
 class(train$P_F)
 class(train$TA_F)
 class(train$Upland)
 ```
 
-To project this model in space we need the following variables:
+To project this model in space, we need the following variables:
 
 (1) Monthly total precipitation in mm and the name of the layer needs to be "P_F"
-(2) Monthly mean air temperature temperature in degrees Celsius and the layer name needs to be "TA_F"
+(2) Monthly mean air temperature in degrees Celsius and the layer name needs to be "TA_F"
 (3) We need an indicator for Upland ecosystems called Upland. All inundated ecosystems (+ snow) are called "inundated" and non-inundated ecosystems are called "upland". Croplands and urban areas should be filtered out of this layer. 
 
 # (2) Determine where you can get a spatial version of each variable in your model.
 
 (1) Monthly total precipitation (mm): Terra climate (getTerraClim())
 (2) Monthly mean air temperature temperature in degrees Celsius: Terra climate (getTerraClim())
-(3) Indicator for Upland ecosystems (Upland): MODIS Land Cover Data (Majority_Land_Cover_Type_1) downloaded from: (2001 - 2022) https://lpdaac.usgs.gov/products/mcd12c1v061/ the user guige is available here: https://lpdaac.usgs.gov/documents/101/MCD12_User_Guide_V6.pdf
+(3) Indicator for Upland ecosystems (Upland): MODIS Land Cover Data (Majority_Land_Cover_Type_1) downloaded from: (2001 - 2022) https://lpdaac.usgs.gov/products/mcd12c1v061/ the user guide is available here: https://lpdaac.usgs.gov/documents/101/MCD12_User_Guide_V6.pdf
 
-To use raster layers with the predict function they have to have the same crs, resolution, and extent!
+To use raster layers with the predict function, they must have the same CRS, resolution, and extent!
 
 #(3) Format each spatial layer 
 
@@ -123,7 +123,7 @@ look at the layer. Here I use"[[1]]" to see only the first layer, which is for t
 ```{r}
 terra::plot(igbp.ct[[1]])
 ```
-Reclassify each value, one at a time, to think about how you should reclassify each one. We want to give all uplands the value 1 and all inundated systems the value 0.
+Reclassify each value, one at a time, and think about how you should reclassify each. We want to give all uplands the value one and all inundated systems the value 0.
 
 First, make a copy of the raters (igbp.ct) and call it igbp.ct.r
 ```{r}
@@ -155,11 +155,11 @@ igbp.ct.r[ igbp.ct.r == 15] <- 0
 igbp.ct.r[ igbp.ct.r == 16] <- 1
 igbp.ct.r[ igbp.ct.r == 17] <- 0
 ```
-Look at the final rater to ensure everything is reclassified to upland, since Conneticuit doesn't have anything else at the resolution of MODIS.
+Look at the final rater to ensure everything is reclassified to upland since Connecticut doesn't have anything else at the resolution of MODIS.
 ```{r}
 terra::plot(igbp.ct[[1]] ) 
 ```
-Format the upland layer as a factor by first making a dataframe that has the raster values 0 and 1 and the corresponding factor level. 
+Format the upland layer as a factor by first making a data frame that has the raster values 0 and 1 and the corresponding factor level. 
 ```{r}
 factors.df <- data.frame(id=c(1, 0), cover=c("upland", "inundated"))
 ```
@@ -187,7 +187,7 @@ All the resolutions must be the same to combine the rasters into one item. We wi
 global.clim.tmean.resample <- resample( global.clim.tmean, igbp.ct.r.2021)
 global.clim.ppt.resample <- resample( global.clim.ppt, igbp.ct.r.2021)
 ```
-Now export the files to save a version that is processed as needed.
+Now, export the files to save a version processed as needed.
 ```{r}
 writeRaster(global.clim.tmean.resample, "data/TERRA_TMEAN_2021_CT_rs.tif", overwrite=TRUE )
 writeRaster(global.clim.ppt.resample, "data/TERRA_PPT_2021_CT_rs.tif", overwrite=TRUE )
@@ -206,7 +206,7 @@ Make the names of the raster layers match the dataframe.
 names(model.rasters.m1 ) <- c("Upland", "TA_F", "P_F" )
 model.rasters.m1
 ```
-Check the dataframe one more time to ensure you don't need to make additional changes to the raster.
+Check the dataframe again to ensure you don't need to make additional changes to the raster.
 ```{r}
 class(train$Upland )
 summary(train$Upland )
