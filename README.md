@@ -106,6 +106,8 @@ Load the data.
 ```{r}
 igbp.ct <- terra::rast("data/MODIS_IGBP_2001-2022_CT.tif")
 igbp.ct 
+
+igbp.ct[[1]] %>% plot
 ```
 This layer needs to be reformatted. Using the User Guide we can determine what each numerical value represents: https://lpdaac.usgs.gov/documents/1409/MCD12_User_Guide_V61.pdf
 
@@ -166,7 +168,7 @@ igbp.ct.r[ igbp.ct.r == 17] <- 0
 ```
 Look at the final raster to ensure everything is reclassified to upland since Connecticut doesn't have anything else at the resolution of MODIS.
 ```{r}
-terra::plot(igbp.ct[[1]] ) 
+terra::plot(igbp.ct.r[[1]], col='red' ) 
 ```
 Format the upland layer as a factor by first making a data frame that has the raster values 0 and 1 and the corresponding factor level. 
 ```{r}
@@ -180,7 +182,7 @@ for ( i in 1:22){
   is.factor(igbp.ct.r)
 }
 
-terra::plot(igbp.ct.r, col="red" )
+terra::plot(igbp.ct.r[[1]], col="red" )
 ```
 We only need the layer for 2021. Subset the 2021 layer.
 ```{r}
@@ -258,25 +260,23 @@ for ( i in 1:12){
   writeRaster(pred ,paste("MODEL_PRED_m",i,".tif", sep =""), overwrite=TRUE )
 }
 ```
-
-Make of list of all the files in a directory with a specific name element.
+Delete the json files created:
+```{r}
+delete <- list.files( pattern=".json")
+file.remove(delete)
+```
+Make of list of all the files in a directory that you want to import, and import all the files in the list with rast().
 ```{r}
 pred <- list.files( pattern="MODEL_PRED_m")
-```
-Import the files.
-```{r}
 predictions <- rast(pred)
-predictions
 ```
 # (5) Use predictions
-Create the 2021 methane budget.
+Create the 2021 methane budget. To get an annual budget, sum the total monthly fluxes.
 ```{r}
 predictions.2021.total <- sum(predictions )
 units(predictions.2021.total ) <- 'g C m-2 year-1' # add the units
 names(predictions.2021.total ) <- "F_CH4"
-plot(predictions.2021.total)
 ```
-
 To determine the total amount of methane in 2021 for natural areas we need to consider the area:
 
 ```{r}
@@ -288,7 +288,6 @@ units(predictions.2021.total$F_CH4_total) <- "Gigatons of carbon per year"
 global( predictions.2021.total$F_CH4_total, "sum", na.rm=T)
 
 ```
-
 Now you are ready to follow the same workflow for your model.
 (1) For your final project, determine where you will project your model.  
 (2) Make a list of the variables, their units, the exact name and class of each variable in your model.   
