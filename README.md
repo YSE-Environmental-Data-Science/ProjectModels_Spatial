@@ -44,7 +44,6 @@ class(train$P_F)
 class(train$TA_F)
 class(train$Upland)
 ```
-
 To project this model in space, we need the following variables:
 
 (1) Monthly total precipitation in mm and the name of the layer needs to be "P_F"
